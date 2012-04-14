@@ -465,10 +465,10 @@ void MainController::performLoginFromCachedCredentials() {
 		storages_ = storagesFactory_->createStorages(jid_.toBare());
 		certificateStorage_ = certificateStorageFactory_->createCertificateStorage(jid_.toBare());
 		certificateTrustChecker_ = new CertificateStorageTrustChecker(certificateStorage_);
-
 		client_ = boost::make_shared<Swift::Client>(clientJID, createSafeByteArray(password_.c_str()), networkFactories_, storages_);
 		clientInitialized_ = true;
 		client_->setCertificateTrustChecker(certificateTrustChecker_);
+		xmlConsoleController_->setStanzaChannel(client_->getStanzaChannel());
 		client_->onDataRead.connect(boost::bind(&XMLConsoleController::handleDataRead, xmlConsoleController_, _1));
 		client_->onDataWritten.connect(boost::bind(&XMLConsoleController::handleDataWritten, xmlConsoleController_, _1));
 		client_->onDisconnected.connect(boost::bind(&MainController::handleDisconnected, this, _1));
