@@ -7,7 +7,11 @@
 #pragma once
 
 #include "Swift/QtUI/Roster/QtTreeWidget.h"
-
+#include <QPoint>
+#include <QContextMenuEvent>
+#include <QMenu>
+#include <QInputDialog>
+#include <QFileDialog>
 namespace Swift {
 class QtUIPreferences;
 
@@ -16,12 +20,16 @@ class QtRosterWidget : public QtTreeWidget {
 	public:
 		QtRosterWidget(UIEventStream* eventStream, SettingsProvider* settings, QWidget* parent = 0);
 		virtual ~QtRosterWidget();
+		void mousePressedEvent(QMouseEvent* event);
+		void mouseMoveEvent(QMouseEvent* event);
 	public slots:
 		void handleEditUserActionTriggered(bool checked);
 	protected:
 		void contextMenuEvent(QContextMenuEvent* event);
 	private:
 		void renameGroup(GroupRosterItem* group);
+		QPoint dragStartPosition;
+		QModelIndex clickedIndex;
 };
 
 }

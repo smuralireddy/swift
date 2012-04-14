@@ -7,6 +7,7 @@
 #include "QtChatWindow.h"
 #include "QtSwiftUtil.h"
 #include "Swift/Controllers/Roster/Roster.h"
+#include <Swift/QtUI/Roster/QtRosterWidget.h>
 #include "Swift/Controllers/Roster/RosterItem.h"
 #include "Swift/Controllers/Roster/ContactRosterItem.h"
 #include "Roster/QtOccupantListWidget.h"
@@ -355,7 +356,7 @@ void QtChatWindow::closeEvent(QCloseEvent* event) {
 }
 
 void QtChatWindow::convertToMUC() {
-	setAcceptDrops(false);
+	setAcceptDrops(true);
 	treeWidget_->show();
 	subject_->show();
 	actionButton_->show();
@@ -707,13 +708,21 @@ void QtChatWindow::dragEnterEvent(QDragEnterEvent *event) {
 		// TODO: check whether contact actually supports file transfer
 		event->acceptProposedAction();
 	}
+	else if (event->mimeData()->hasFormat("text/plain")) {
+		event->acceptProposedAction();
+	}
 }
 
 void QtChatWindow::dropEvent(QDropEvent *event) {
-	if (event->mimeData()->urls().size() == 1) {
+	if (event->mimeData()->hasFormat("text/plain") &&  event->source()) {
+		QString jid=event->mimeData()->text();
+		onInvitePersonToThisMUCRequest(JID(Q2PSTRING(jid)),"");
+	}
+	else if (event->mimeData()->urls().size() == 1) {
 		onSendFileRequest(Q2PSTRING(event->mimeData()->urls().at(0).toLocalFile()));
-	} else {
-		addSystemMessage("Sending of multiple files at once isn't supported at this time.");
+	} 
+	else {
+		addSystemMessage("Sending of multiple files at once isn't supported at this time. or Illegal Object was added");
 	}
 }
 

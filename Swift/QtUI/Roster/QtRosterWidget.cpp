@@ -5,12 +5,6 @@
  */
 
 #include "Roster/QtRosterWidget.h"
-
-#include <QContextMenuEvent>
-#include <QMenu>
-#include <QInputDialog>
-#include <QFileDialog>
-
 #include "Swift/Controllers/UIEvents/RequestContactEditorUIEvent.h"
 #include "Swift/Controllers/UIEvents/RemoveRosterItemUIEvent.h"
 #include "Swift/Controllers/UIEvents/RenameGroupUIEvent.h"
@@ -20,6 +14,8 @@
 #include "Swift/Controllers/Roster/GroupRosterItem.h"
 #include "Swift/Controllers/UIEvents/UIEventStream.h"
 #include "QtSwiftUtil.h"
+#include <QDrag>
+#include <QMimeData>
 
 namespace Swift {
 
@@ -96,5 +92,32 @@ void QtRosterWidget::renameGroup(GroupRosterItem* group) {
 		eventStream_->send(boost::make_shared<RenameGroupUIEvent>(group->getDisplayName(), Q2PSTRING(newName)));
 	}
 }
+void QtRosterWidget::mousePressedEvent(QMouseEvent* event) {
+	if (event->button() == Qt::LeftButton) {
+		dragStartPosition = event->pos();
+	}
+}
+void QtRosterWidget::mouseMoveEvent(QMouseEvent *event)
+ {
+	if (!(event->buttons() & Qt::LeftButton)) {
+		return;
+	}
+	if ((event->pos() - dragStartPosition).manhattanLength()< QApplication::startDragDistance()) {
+		return;
+	}
+	clickedIndex=indexAt(event->pos());
+	if (!clickedIndex.isValid()) {
+		return;
+	}
+	QDrag *drag = new QDrag(this);
+	QMimeData *mimeData = new QMimeData();
+	RosterItem* item = static_cast<RosterItem*>(clickedIndex.internalPointer());
+	ContactRosterItem* contact = dynamic_cast<ContactRosterItem*>(item);
+	std::string jid=contact->getJID().toString();
+	QString str=QString::P2QSTRING(jid);
+	mimeData->setText(str);
+	drag->setMimeData(mimeData);
+	drag->exec(Qt::CopyAction | Qt::MoveAction);     
+ }
 
 }
