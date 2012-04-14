@@ -1,0 +1,5 @@
+*.a
+*.o
+Swiften.h
+Version.h
+libSwiften.so.*

@@ -1,0 +1,19 @@
+Import("env")
+
+
+if env["SCONS_STAGE"] == "build":
+	myenv = env.Clone()
+	myenv.MergeFlags(myenv.get("LUA_FLAGS", {}))
+	myenv.MergeFlags(myenv["SWIFTEN_FLAGS"])
+	myenv.MergeFlags(myenv["SWIFTEN_DEP_FLAGS"])
+	sources = [
+		"linit.cpp",
+		"Swiftob.cpp",
+		"Users.cpp",
+		"Commands.cpp",
+		"MUCs.cpp",
+		"Storage.cpp",
+		"LuaCommands.cpp",
+		"main.cpp"
+	]
+	swiftob = myenv.Program("swiftob", sources)

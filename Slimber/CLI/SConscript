@@ -1,0 +1,18 @@
+Import("env")
+
+myenv = env.Clone()
+myenv.UseFlags(env["SLIMBER_FLAGS"])
+myenv.UseFlags(env["LIMBER_FLAGS"])
+myenv.UseFlags(env["SWIFTOOLS_FLAGS"])
+myenv.UseFlags(env["SWIFTEN_FLAGS"])
+myenv.UseFlags(env["LIBIDN_FLAGS"])
+myenv.UseFlags(env["BOOST_FLAGS"])
+myenv.UseFlags(env.get("LIBXML_FLAGS", {}))
+myenv.UseFlags(env.get("EXPAT_FLAGS", {}))
+myenv.UseFlags(env.get("AVAHI_FLAGS", {}))
+myenv.UseFlags(myenv["PLATFORM_FLAGS"])
+
+myenv.Program("slimber", [
+		"main.cpp",
+		"DummyMenulet.cpp",
+	])

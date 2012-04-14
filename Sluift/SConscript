@@ -1,0 +1,64 @@
+import Version, os.path
+
+Import(["env", "conf_env"])
+
+if env["SCONS_STAGE"] == "build" :
+	lib_env = env.Clone()
+	lib_env.UseFlags(env["LUA_FLAGS"])
+	lib_env.UseFlags(env["SWIFTEN_FLAGS"])
+	lib_env.UseFlags(env["SWIFTEN_DEP_FLAGS"])
+	sluift_lib = lib_env.StaticLibrary("SluiftCore", [
+			"Lua/Value.cpp",
+			"sluift.cpp"
+		]);
+
+	myenv = env.Clone()
+	myenv.Append(LIBS = sluift_lib)
+	myenv.UseFlags(env.get("LUA_FLAGS", {}))
+	myenv.UseFlags(env["SWIFTEN_FLAGS"])
+	myenv.UseFlags(env["SWIFTEN_DEP_FLAGS"])
+	myenv["SHLIBPREFIX"] = ""
+	if myenv["PLATFORM"] == "win32" :
+		myenv.Append(CPPDEFINES = ["SLUIFT_BUILD_DLL"])
+	elif myenv["PLATFORM"] == "darwin" :
+		myenv["SHLIBSUFFIX"] = ".so"
+	if env["PLATFORM"] == "win32" :
+		myenv.Append(CFLAGS = ["/TP"])
+	else :
+		myenv.Append(CFLAGS = ["-x", "c++"])
+
+	myenv["SLUIFT_VERSION"] = Version.getBuildVersion(env.Dir("#").abspath, "sluift")
+	def patchLua(env, target, source) :
+		f = open(source[0].abspath, "r")
+		contents = f.read()
+		f.close()
+		if env["PLATFORM"] == "win32" :
+			key = "Z"
+		else :
+			key = "D"
+		contents = contents.replace("LUA_RELEASE", "\"== Sluift XMPP Console (%(version)s) == \\nPress Ctrl-%(key)s to exit\"" % {"version": source[1].get_contents(), "key" : key})
+		contents = contents.replace("LUA_COPYRIGHT", "")
+		f = open(target[0].abspath, "w")
+		f.write(contents)
+		f.close()
+
+	myenv.Command("lua.c", ["#/3rdParty/Lua/src/lua.c", myenv.Value(myenv["SLUIFT_VERSION"])], env.Action(patchLua, cmdstr = "$GENCOMSTR"))
+	if myenv.get("HAVE_READLINE", False) :
+		myenv.Append(CPPDEFINES = ["LUA_USE_READLINE"])
+		myenv.MergeFlags(myenv["READLINE_FLAGS"])
+	env["SLUIFT"] = myenv.Program("sluift", [
+			"lua.c",
+			"linit.c",
+		])
+
+	myenv.WriteVal("dll.c", myenv.Value(""))
+	myenv.SharedLibrary("sluift", ["dll.c"])
+
+	if env["PLATFORM"] == "win32" :
+		ssl_libs = []
+		if myenv.get("OPENSSL_DIR", False) :
+			ssl_libs = [
+			os.path.join(env["OPENSSL_DIR"], "bin", "ssleay32.dll"),  
+			os.path.join(env["OPENSSL_DIR"], "bin", "libeay32.dll")
+		]
+		myenv.WindowsBundle("Sluift", resources = {"": ssl_libs})

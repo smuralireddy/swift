@@ -1,0 +1,53 @@
+import os, shutil, datetime
+
+Import("env")
+
+myenv = env.Clone()
+myenv["CXXFLAGS"] = filter(lambda x : x != "-Wfloat-equal", myenv["CXXFLAGS"])
+myenv.UseFlags(env["SLIMBER_FLAGS"])
+myenv.UseFlags(env["LIMBER_FLAGS"])
+myenv.UseFlags(env["SWIFTOOLS_FLAGS"])
+myenv.UseFlags(env["SWIFTEN_FLAGS"])
+myenv.UseFlags(env["LIBIDN_FLAGS"])
+myenv.UseFlags(env["BOOST_FLAGS"])
+myenv.UseFlags(env.get("LIBXML_FLAGS", ""))
+myenv.UseFlags(env.get("EXPAT_FLAGS", ""))
+myenv.UseFlags(env.get("AVAHI_FLAGS", ""))
+myenv.UseFlags(myenv["PLATFORM_FLAGS"])
+
+myenv.Tool("qt4", toolpath = ["#/BuildTools/SCons/Tools"])
+myenv.Tool("nsis", toolpath = ["#/BuildTools/SCons/Tools"])
+myenv.EnableQt4Modules(['QtCore', 'QtGui'], debug = False)
+
+myenv.Append(CPPPATH = ["."])
+
+if env["PLATFORM"] == "win32" :
+	myenv.Append(LINKFLAGS = ["/SUBSYSTEM:WINDOWS"])
+	myenv.Append(LIBS = "qtmain")
+
+myenv.BuildVersion("BuildVersion.h", project = "slimber")
+
+sources = [
+		"main.cpp", 
+		"QtMenulet.cpp",
+		"QtAboutDialog.cpp",
+		myenv.Qrc("Slimber.qrc"),
+	]
+
+#if env["PLATFORM"] == "win32" :
+#	myenv.RES("../resources/Windows/Slimber.rc")
+#	sources += ["../resources/Windows/Slimber.res"]
+
+if env["PLATFORM"] == "win32" :
+	slimberProgram = myenv.Program("Slimber", sources)
+else :
+	slimberProgram = myenv.Program("slimber", sources)
+
+if env["PLATFORM"] == "win32" :
+	if "dist" in COMMAND_LINE_TARGETS or env.GetOption("clean") :
+		myenv.WindowsBundle("Slimber", resources = {}, qtlibs = ["QtCore4", "QtGui4"])
+		myenv.Append(NSIS_OPTIONS = [
+				"/DmsvccRedistributableDir=\"" + env["vcredist"] + "\"", 
+				"/DbuildDate=" + datetime.date.today().strftime("%Y%m%d")
+			])
+		#myenv.Nsis("../Packaging/nsis/slimber.nsi")

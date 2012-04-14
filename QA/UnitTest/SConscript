@@ -1,0 +1,38 @@
+import os
+
+Import("env")
+
+if env["TEST"] :
+	if env["SCONS_STAGE"] == "flags" :
+		env["UNITTEST_SOURCES"] = []
+		env["UNITTEST_OBJECTS"] = []
+	if env["SCONS_STAGE"] == "test" :
+		myenv = env.Clone()
+		myenv.UseFlags(env.get("CHECKER_FLAGS",""))
+		myenv.UseFlags(env.get("SLIMBER_FLAGS",""))
+		myenv.UseFlags(env.get("SWIFT_CONTROLLERS_FLAGS",""))
+		myenv.UseFlags(env.get("SWIFTOOLS_FLAGS",""))
+		myenv.UseFlags(env.get("LIMBER_FLAGS",""))
+		myenv.UseFlags(env.get("SWIFTEN_FLAGS",""))
+		myenv.UseFlags(env.get("CPPUNIT_FLAGS",""))
+		myenv.UseFlags(env.get("LIBIDN_FLAGS", ""))
+		myenv.UseFlags(env.get("BOOST_FLAGS", ""))
+		myenv.UseFlags(env.get("SQLITE_FLAGS", ""))
+		myenv.UseFlags(env.get("LIBXML_FLAGS", ""))
+		myenv.UseFlags(env.get("EXPAT_FLAGS", ""))
+		myenv.UseFlags(env.get("ZLIB_FLAGS", ""))
+		myenv.UseFlags(env.get("OPENSSL_FLAGS", ""))
+		myenv.UseFlags(env["PLATFORM_FLAGS"])
+		if env.get("HAVE_LIBXML") :
+			myenv.Append(CPPDEFINES = ["HAVE_LIBXML"])
+		if env.get("HAVE_EXPAT") :
+			myenv.Append(CPPDEFINES = ["HAVE_EXPAT"])
+		if env["TEST_CREATE_LIBRARIES"] :
+			lib = myenv.StaticLibrary("Swift_UnitTests", env["UNITTEST_SOURCES"] + env["UNITTEST_OBJECTS"])
+			myenv.Program("checker", lib)
+		else :
+			checker = myenv.Program("checker", env["UNITTEST_SOURCES"] + env["UNITTEST_OBJECTS"])
+			for i in ["HOME", "USERPROFILE", "APPDATA"]:
+				if os.environ.get(i, "") :
+					myenv["ENV"][i] = os.environ[i]
+			myenv.Test(checker, is_checker = True)

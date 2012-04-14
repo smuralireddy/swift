@@ -1,0 +1,10 @@
+*.a
+*.o
+*.obj
+*.exe
+*.lib
+*.pdb
+*.ilk
+*.manifest
+/bcp
+uuid

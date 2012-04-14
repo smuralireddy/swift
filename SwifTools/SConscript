@@ -1,0 +1,61 @@
+Import("env")
+
+################################################################################
+# Flags
+################################################################################
+
+if env["SCONS_STAGE"] == "flags" :
+	env["SWIFTOOLS_FLAGS"] = {
+			"LIBPATH": [Dir(".")],
+			"LIBS": ["SwifTools"]
+		}
+
+################################################################################
+# Build
+################################################################################
+
+if env["SCONS_STAGE"] == "build" :
+	swiftools_env = env.Clone()
+	swiftools_env.MergeFlags(swiftools_env["BOOST_FLAGS"])
+
+	sources = [
+			"Idle/IdleDetector.cpp",
+			"Idle/ActualIdleDetector.cpp",
+			"Idle/IdleQuerier.cpp",
+			"Idle/PlatformIdleQuerier.cpp",
+			"AutoUpdater/AutoUpdater.cpp",
+			"AutoUpdater/PlatformAutoUpdaterFactory.cpp",
+			"Linkify.cpp",
+			"TabComplete.cpp",
+			"LastLineTracker.cpp",
+		]
+
+	if swiftools_env.get("HAVE_SPARKLE", 0) :
+		swiftools_env.MergeFlags(swiftools_env["SPARKLE_FLAGS"])
+		swiftools_env.Append(CPPDEFINES = ["HAVE_SPARKLE"])
+		sources += ["AutoUpdater/SparkleAutoUpdater.mm"]
+
+	if swiftools_env["PLATFORM"] == "win32" :
+		sources += ["Idle/WindowsIdleQuerier.cpp"]
+	elif swiftools_env["PLATFORM"] == "darwin" and swiftools_env.get("HAVE_IOKIT", False) :
+			swiftools_env.Append(CPPDEFINES = ["HAVE_IOKIT"])
+			sources += ["Idle/MacOSXIdleQuerier.cpp"]
+	elif swiftools_env["HAVE_XSS"] :
+		swiftools_env.Append(CPPDEFINES = ["HAVE_XSS"])
+		sources += ["Idle/XSSIdleQuerier.cpp"]
+	
+	swiftools_env["SWIFTOOLS_OBJECTS"] = []
+	Export("swiftools_env")
+	
+	SConscript(dirs = [
+			"Application",
+			"Dock",
+			"Notifier",
+			"URIHandler",
+			"Idle/IdleQuerierTest",
+			"Idle/UnitTest",
+			"Cocoa",
+			"UnitTest"
+		])
+
+	swiftools_env.StaticLibrary("SwifTools", sources + swiftools_env["SWIFTOOLS_OBJECTS"])

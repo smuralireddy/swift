@@ -1,0 +1,16 @@
+import datetime
+
+Import("env")
+
+SConscript("Controllers/SConscript")
+
+if env["SCONS_STAGE"] == "build" :
+	if not GetOption("help") and not env.get("HAVE_OPENSSL", 0) and not env.get("HAVE_SCHANNEL", 0) :
+		print "Error: Swift requires OpenSSL support, and OpenSSL was not found."
+		if "Swift" in env["PROJECTS"] :
+			env["PROJECTS"].remove("Swift")
+	elif not GetOption("help") and not env.get("HAVE_QT", 0) :
+		print "Error: Swift requires Qt. Not building Swift."
+		env["PROJECTS"].remove("Swift")
+	elif env["target"] == "native":
+		 SConscript("QtUI/SConscript")

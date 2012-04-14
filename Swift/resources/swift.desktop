@@ -1,0 +1,46 @@
+[Desktop Entry]
+
+# Desktop Entry specification version
+Version=1.0
+
+Type=Application
+Name=Swift
+GenericName=Jabber/XMPP Messenger
+Comment=Communicate over the Jabber/XMPP network
+Icon=swift
+Exec=swift
+Terminal=false
+Categories=Network;InstantMessaging;Qt;
+
+GenericName[ca]=Missatger Jabber/XMPP
+Comment[ca]=Comunica't per la xarxa Jabber/XMPP
+
+GenericName[de]=Jabber/XMPP Messenger
+Comment[de]=Kommuniziere über das Jabber/XMPP Netzwerk
+
+GenericName[es]=Cliente de mensajería Jabber/XMPP
+Comment[es]=Comunícate por la red Jabber/XMPP
+
+GenericName[fr]=Client de messagerie instantanée Jabber/XMPP
+Comment[fr]=Communiquer sur le réseau Jabber/XMPP
+
+GenericName[gl]=Cliente de mensaxería Jabber/XMPP
+Comment[gl]=Comunícate empregando a rede Jabber/XMPP
+
+GenericName[hu]=Jabber/XMPP Azonnali üzenetküldő
+Comment[hu]=Beszélgetés Jabber/XMPP protokollon keresztül
+
+GenericName[nl]=Jabber/XMPP Boodschapper
+Comment[nl]=Communiceer over het Jabber/XMPP netwerk
+
+GenericName[pl]=Komunikator Jabber/XMPP
+Comment[pl]=Rozmawiaj poprzez sieć Jabber/XMPP
+
+GenericName[ru]=Jabber-клиент
+Comment[ru]=Общение в сети Jabber
+
+GenericName[sv]=Jabber/XMPP Messenger
+Comment[sv]=Kommunicera	över Jabber/XMPP nätverket
+
+GenericName[sk]=Jabber/XMPP Komunikátor
+Comment[sk]=Rozprávajte sa cez sieť Jabber/XMPP
